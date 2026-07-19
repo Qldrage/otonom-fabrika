@@ -1,0 +1,108 @@
+.monitor-container {
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.monitor-container h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.pipeline-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  border-radius: 8px;
+  background: hsla(0, 0%, 100%, 0.03);
+  border: 1px solid var(--surface-border);
+  transition: all 0.3s ease;
+}
+
+.step.completed {
+  border-left: 4px solid var(--success);
+}
+
+.step.active {
+  border-left: 4px solid var(--accent-primary);
+  background: hsla(250, 100%, 65%, 0.1);
+  transform: scale(1.02);
+}
+
+.step.pending {
+  opacity: 0.5;
+}
+
+.step-icon {
+  font-size: 1.5rem;
+}
+
+.step-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+}
+
+.step-status {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.approval-box {
+  margin-top: 10px;
+  background: hsla(40, 100%, 50%, 0.1);
+  border: 1px solid var(--warning);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.approval-content h4 {
+  margin: 0 0 5px 0;
+  color: var(--warning);
+}
+
+.approval-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.cost-estimate {
+  margin-top: 10px;
+  font-weight: bold;
+  color: var(--text-primary);
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+.finops-mini {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid var(--surface-border);
+}
+
+.finops-mini h4 {
+  margin: 0 0 10px 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  font-family: monospace;
+}

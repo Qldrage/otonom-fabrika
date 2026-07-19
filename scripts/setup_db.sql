@@ -1,0 +1,4 @@
+CREATE USER dante WITH SUPERUSER PASSWORD '123456';
+CREATE DATABASE otonom_fabrika OWNER dante;
+\c otonom_fabrika
+CREATE EXTENSION IF NOT EXISTS vector;
