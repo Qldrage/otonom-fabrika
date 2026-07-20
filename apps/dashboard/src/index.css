@@ -149,3 +149,7 @@ body {
   height: 100%;
   background: radial-gradient(circle at top right, hsla(250, 100%, 65%, 0.05), transparent 40%);
 }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+

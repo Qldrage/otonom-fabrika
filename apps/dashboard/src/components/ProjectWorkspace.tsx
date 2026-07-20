@@ -1,4 +1,4 @@
-
+import React from 'react';
 import { ChatView } from './ChatView';
 import { FactoryMonitor } from './FactoryMonitor';
 import './ProjectWorkspace.css';
