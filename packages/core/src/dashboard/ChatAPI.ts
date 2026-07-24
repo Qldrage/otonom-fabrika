@@ -15,11 +15,6 @@ const vllmProvider = createOpenAI({
   apiKey: 'sk-local',
 });
 
-const tabbyProvider = createOpenAI({
-  baseURL: process.env.TABBY_BASE_URL ?? 'http://localhost:8000/v1',
-  apiKey: 'sk-local',
-});
-
 export function createChatHandler() {
   return async (req: http.IncomingMessage, res: http.ServerResponse) => {
     if (req.method !== 'POST' || req.url !== '/api/chat') return false;
@@ -53,7 +48,7 @@ Format:
       });
 
       const result = streamText({
-        model: tabbyProvider('qwen-2.5-coder-32b-awq'), // Geçici olarak Qwen 32B üzerinden çalışır
+        model: vllmProvider('qwen-2.5-coder-32b-awq'), // Geçici olarak Qwen 32B üzerinden çalışır
         system: systemPrompt,
         messages,
         onFinish: async (event) => {

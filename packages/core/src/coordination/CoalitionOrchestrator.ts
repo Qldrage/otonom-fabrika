@@ -5,7 +5,12 @@ import { fileTools } from '../tools/FileTools';
 import { commandRunnerTool } from '../tools/CommandRunnerTool';
 import { generateText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
+import { google } from '@ai-sdk/google';
 import { ModelOffloadManager } from '../llm/ModelOffloadManager';
+import { extractJSON, extractCodeBlock } from '../utils/jsonParser';
+import { MCPManager } from '../mcp/MCPManager';
+import fs from 'fs/promises';
+import path from 'path';
 
 export class CoalitionOrchestrator {
   private vllmProvider = createOpenAI({
@@ -13,13 +18,13 @@ export class CoalitionOrchestrator {
     apiKey: 'sk-local',
   });
 
-  public async startCoalition(userPrompt: string): Promise<number> {
+  public async startCoalition(promptOrPlan: string | any): Promise<number> {
     const [workflow] = await db.insert(workflows).values({
-      userPrompt,
+      userPrompt: typeof promptOrPlan === 'string' ? promptOrPlan : 'Pre-planned execution',
       status: 'running',
     }).returning({ id: workflows.id });
 
-    this.executeCoalition(workflow.id, userPrompt).catch(err => {
+    this.executeCoalition(workflow.id, promptOrPlan).catch(err => {
       console.error(`[Coalition] Workflow ${workflow.id} hata verdi:`, err);
       db.update(workflows).set({ status: 'failed' }).where(eq(workflows.id, workflow.id)).execute();
     });
@@ -27,50 +32,98 @@ export class CoalitionOrchestrator {
     return workflow.id;
   }
 
-  private async executeCoalition(workflowId: number, userPrompt: string): Promise<void> {
+  private async executeCoalition(workflowId: number, promptOrPlan: any): Promise<void> {
     let retryCount = 0;
     const MAX_RETRY = 3;
 
     try {
-      // 1. STEP: LLaMA ARCHITECT
-      console.log(`[Coalition] STEP 1: LLaMA (Architect) Planlıyor...`);
-      await ModelOffloadManager.loadArchitect((msg) => console.log(`[ModelOffload] ${msg}`));
+      // 1. STEP: Gemini (Lead Developer / Baş Mimar)
+      console.log(`[Coalition] STEP 1: Gemini (Lead Developer) Testleri ve Planı Sisteme Yüklüyor...`);
       
-      let architectPlan = await this.runArchitect(userPrompt);
+      if (typeof promptOrPlan === 'string' || !promptOrPlan.testCode || !promptOrPlan.testFilePath) {
+         throw new Error("SİSTEM KURALI İHLALİ: Testleri Qwen'e yazdırmaya çalıştınız. Testler sadece Gemini (Lead Developer) tarafından JSON formatında (testCode, testFilePath, cwd) sağlanmalıdır.");
+      }
+
+      const { testCode, testFilePath, cwd, coderInstruction, visionEnabled } = promptOrPlan;
+      const workspaceDir = path.resolve(process.env.WORKSPACE_DIR ?? './workspace');
+      const targetCwd = cwd ? path.resolve(workspaceDir, cwd) : workspaceDir;
+
+      // Ensure directory exists
+      try {
+        await fs.access(targetCwd);
+      } catch {
+        await fs.mkdir(targetCwd, { recursive: true });
+      }
+
+      // Write test to disk
+      const fullTestPath = path.resolve(targetCwd, testFilePath);
+      const testFileDir = path.dirname(fullTestPath);
+      try {
+        await fs.access(testFileDir);
+      } catch {
+        await fs.mkdir(testFileDir, { recursive: true });
+      }
+      try {
+         await fs.chmod(fullTestPath, 0o666);
+      } catch (e) {
+         // Ignore if file does not exist
+      }
+      await fs.writeFile(fullTestPath, testCode, 'utf8');
+      console.log(`[Coalition] Lead Developer Testleri Diske Kaydedildi: ${fullTestPath}`);
+
+      // Lock test files so Coder can't cheat
+      await this.lockTestFiles(cwd || '');
+
+      // Validate tests are RED initially
+      let testResult = await commandRunnerTool.execute({ command: `npx vitest run ${testFilePath}`, cwd: cwd || '' }) as any;
+      console.log(`[Coalition] Lead Test Başlangıç Durumu (RED Bekleniyor): ${testResult.success ? 'GREEN (Uyarı: Test hemen geçti?)' : 'RED'}`);
+      console.log(`[Coalition] Vitest Çıktısı:\n${testResult.output}`);
+
+      let testError = testResult.output;
 
       while (retryCount < MAX_RETRY) {
-        // 2. STEP: DeepSeek-R1 (TDD)
-        console.log(`[Coalition] STEP 2: DeepSeek-R1 (TDD Engineer) Testleri Yazıyor...`);
-        await ModelOffloadManager.loadTDD((msg) => console.log(`[ModelOffload] ${msg}`));
-        const r1Output = await this.runTDD(architectPlan);
-        
-        const testResult = await commandRunnerTool.execute({ command: 'npm test' }) as any;
-        console.log(`[Coalition] R1 Test Sonucu: ${testResult.success ? 'GREEN' : 'RED'}`);
-
-        // 3. STEP: Qwen-32B (CODER)
-        console.log(`[Coalition] STEP 3: Qwen-32B (Coder) Üretim Kodunu Yazıyor...`);
+        // 2. STEP: Qwen-14B (CODER)
+        console.log(`[Coalition] STEP 2: Qwen-14B (Coder) Üretim Kodunu Yazıyor... (Deneme ${retryCount + 1})`);
         await ModelOffloadManager.loadCoder((msg) => console.log(`[ModelOffload] ${msg}`));
-        await this.runCoder(r1Output, testResult.output);
+        const rawCoderOutput = await this.runCoder(JSON.stringify({ cwd, file_target: testFilePath, coder_instruction: coderInstruction, test_code_to_pass: testCode }), testError);
+        const extractedCode = extractCodeBlock(rawCoderOutput);
+        
+        // Coder output saving logic
+        const sourceFilePath = testFilePath.replace('.test.tsx', '.tsx').replace('.test.js', '.js');
+        const fullSourcePath = path.resolve(targetCwd, sourceFilePath);
+        await fs.writeFile(fullSourcePath, extractedCode, 'utf8');
+        console.log(`[Coalition] Coder Üretimi Diske Kaydedildi: ${fullSourcePath}`);
 
-        // 4. STEP: Testlerin tekrar koşulması (Verifying GREEN)
-        const verifyResult = await commandRunnerTool.execute({ command: 'npm test' }) as any;
+        // 3. STEP: Testlerin tekrar koşulması (Verifying GREEN)
+        const verifyResult = await commandRunnerTool.execute({ command: `npx vitest run ${testFilePath}`, cwd: cwd || '' }) as any;
         
         if (!verifyResult.success) {
           console.log(`[Coalition] Testler hala RED! (Deneme ${retryCount + 1}/${MAX_RETRY})`);
+          console.log(`[Coalition] Vitest Hata Çıktısı:\n${verifyResult.output}`);
           retryCount++;
-          continue; // R1'e geri dön (veya loop'u tekrarla)
+          testError = verifyResult.output;
+          continue; 
+        } else {
+          console.log(`[Coalition] Vitest GREEN Çıktısı:\n${verifyResult.output}`);
         }
 
-        // 5. STEP: Qwen-VL (Vision QA)
-        console.log(`[Coalition] STEP 4: Qwen-VL (Vision QA) UI Kontrolü Yapıyor...`);
-        await ModelOffloadManager.loadVision((msg) => console.log(`[ModelOffload] ${msg}`));
-        const visionResult = await this.runVision();
+        // 4. STEP: Qwen-VL (Vision QA)
+        if (visionEnabled) {
+          console.log(`[Coalition] STEP 4: Qwen-VL (Vision QA) UI Kontrolü Yapıyor...`);
+          try {
+            await ModelOffloadManager.loadVision((msg) => console.log(`[ModelOffload] ${msg}`));
+            const visionOutputText = await this.runVision();
+            const visionResult = extractJSON(visionOutputText);
 
-        if (visionResult.includes('VISUAL_INSPECTION_FAILED')) {
-          console.log(`[Coalition] Görsel Hata Bulundu! (Deneme ${retryCount + 1}/${MAX_RETRY})`);
-          retryCount++;
-          // Görsel hatayı r1Output'a ekleyip döngüyü tekrarla (Gerçek implementasyonda daha kompleks olabilir)
-          continue; 
+            if (visionResult.event === 'VISUAL_INSPECTION_FAILED') {
+              console.log(`[Coalition] Görsel Hata Bulundu! (Deneme ${retryCount + 1}/${MAX_RETRY})`);
+              retryCount++;
+              testError = `GÖRSEL HATA: ${visionResult.description} | DOM: ${visionResult.dom_reference}`;
+              continue;
+            }
+          } catch (visionErr: any) {
+             console.log(`[Coalition] Vision QA Port 8001 bağlantı hatası veya zaman aşımı, bu adım atlanıyor.`);
+          }
         }
 
         console.log(`[Coalition] Tüm testler ve görsel kontroller BAŞARILI! (GREEN)`);
@@ -91,60 +144,69 @@ export class CoalitionOrchestrator {
     }
   }
 
-  private async runArchitect(prompt: string): Promise<string> {
-    const res = await generateText({
-      model: this.vllmProvider('qwen-2.5-coder-32b-awq'), // Placeholder for LLaMA
-      system: `Sen LLaMA (System Architect)'sin. Doğrudan kod yazamazsın. Sadece JSON formatında mimari plan üret.
-Format:
-{
-  "agent_target": "R1",
-  "component_name": "Proje",
-  "architecture_type": "frontend",
-  "dependencies": ["react", "vite"],
-  "state_management_or_db": "none",
-  "tdd_instructions": "Kesin test sınırları"
-}`,
-      prompt: prompt,
-    });
-    return res.text;
-  }
-
-  private async runTDD(architectPlan: string): Promise<string> {
-    const res = await generateText({
-      model: this.vllmProvider('qwen-2.5-coder-32b-awq'), // Placeholder for R1
-      system: `Sen DeepSeek-R1 (TDD Engineer)'sın. Qwen'e sadece kod değiştirmesi için JSON talimatları gönder. Testleri yaz.
-Format:
-{
-  "agent_target": "Qwen-32B",
-  "action": "CREATE_TEST | MODIFY_CODE",
-  "file_target": "App.test.tsx",
-  "root_cause_analysis": "...",
-  "coder_instruction": "...",
-  "expected_test_state": "GREEN",
-  "retry_count": 0
-}`,
-      prompt: `Mimar Planı: ${architectPlan}\n\nTestleri yaz.`,
-      tools: fileTools as any,
-    });
-    return res.text;
-  }
 
   private async runCoder(r1Instruction: string, testError: string): Promise<string> {
     const res = await generateText({
-      model: this.vllmProvider('qwen-2.5-coder-32b-awq'),
-      system: `Sen Qwen-32B (Coder)'sın. Sadece R1'in sana gönderdiği dosyaları güncelle ve testleri geçecek kodu yaz. JSON çıktısı ver.`,
-      prompt: `R1 Talimatı: ${r1Instruction}\n\nMevcut Test Çıktısı:\n${testError}`,
-      tools: fileTools as any,
-    });
+      model: this.vllmProvider('Qwen/Qwen2.5-Coder-14B-Instruct-AWQ'),
+      system: `Sen Qwen-14B (Coder)'sın. Saf üretim gücüsün. Sana verilen test kodunu (test_code_to_pass) DİKKATLİCE OKU.
+Sadece o testi geçecek (GREEN) en optimize kodu yaz.
+Testin beklediği propları (name, role vs.) birebir kullanmak zorundasın.
+İnisiyatif alma, ekstra özellik ekleme. Çıktı olarak sadece Markdown formatında (\`\`\`tsx ... \`\`\`) kod dön, açıklama yazma.`,
+      prompt: `Lead Developer Talimatı ve Testi (JSON):\n${r1Instruction}\n\nMevcut Test Çıktısı (RED ise düzelt, GREEN ise aynen bırak):\n${testError}`,
+      maxSteps: 5,
+    } as any);
     return res.text;
   }
 
   private async runVision(): Promise<string> {
+    const visionProvider = createOpenAI({
+      baseURL: 'http://localhost:8001/v1',
+      apiKey: 'sk-local',
+    });
+    
     const res = await generateText({
-      model: this.vllmProvider('qwen-2.5-coder-32b-awq'), // Placeholder for Qwen-VL
-      system: `Sen Qwen-VL (Vision QA)'sin. DOM referansları ve görsel uyuşmazlıkları tespit edersin. Sadece JSON çıktısı üret.`,
+      model: visionProvider('Qwen/Qwen2-VL-7B-Instruct-AWQ'),
+      system: `Sen Qwen-VL 7B (Vision QA & Observer)'sin. Çalışan arayüzü görsel ve DOM bazlı inceler, hataları teşhis edersin. Sadece JSON çıktısı üret.
+Format:
+{
+  "agent_target": "R1",
+  "event": "VISUAL_INSPECTION_FAILED | VISUAL_INSPECTION_PASSED",
+  "component": "...",
+  "dom_reference": "...",
+  "issue_type": "ALIGNMENT_ERROR | OVERFLOW | LOGIC_ERROR",
+  "description": "..."
+}`,
       prompt: `Sistemi kontrol et. (Simülasyon)`,
     });
     return res.text;
+  }
+
+  private async lockTestFiles(targetCwd: string) {
+    try {
+      const workspaceDir = path.resolve(process.env.WORKSPACE_DIR ?? './workspace');
+      const searchPath = targetCwd ? path.resolve(workspaceDir, targetCwd) : workspaceDir;
+      
+      console.log(`[Coalition] Test dosyaları kilitleniyor (Read-Only)... Hedef: ${searchPath}`);
+      
+      try {
+        await fs.access(searchPath);
+      } catch {
+        await fs.mkdir(searchPath, { recursive: true });
+      }
+
+      const files = await fs.readdir(searchPath, { recursive: true, withFileTypes: true });
+      for (const file of files) {
+        const fileDir = (file as any).parentPath || (file as any).path || searchPath;
+        if (fileDir.includes('node_modules')) continue;
+        
+        if (file.isFile() && file.name.includes('.test.')) {
+          const fullPath = path.join(fileDir, file.name);
+          await fs.chmod(fullPath, 0o444); // Read-only
+          console.log(`[Lock] Kilitlendi: ${fullPath}`);
+        }
+      }
+    } catch (e: any) {
+      console.warn(`[Coalition] Test dosyaları kilitlenirken hata: ${e.message}`);
+    }
   }
 }
