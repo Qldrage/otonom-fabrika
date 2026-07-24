@@ -2,6 +2,34 @@ import { db, tenants, pages } from '@otonom-fabrika/database';
 import { eq, and } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { BlockRenderer, Block } from '@/components/BlockRenderer';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const tenantData = await db.select().from(tenants).where(eq(tenants.slug, slug)).limit(1);
+
+  if (tenantData.length === 0) {
+    return { title: 'Sayfa Bulunamadı' };
+  }
+
+  const tenant = tenantData[0];
+  const pageData = await db
+    .select()
+    .from(pages)
+    .where(and(eq(pages.tenantId, tenant.id), eq(pages.slug, 'home')))
+    .limit(1);
+
+  const seo = (pageData[0]?.seo as any) || {};
+
+  return {
+    title: seo.title || `${tenant.name} | Özelleştirilmiş Perde Sistemleri`,
+    description: seo.description || `${tenant.name} - Kaliteli perde tasarım, montaj ve ölçü hizmetleri.`,
+  };
+}
 
 export default async function TenantPage({
   params,
