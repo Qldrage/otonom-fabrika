@@ -80,10 +80,10 @@ export default function GetStartedPage() {
                   Canlı Web Sitenizi Görün →
                 </a>
                 <a
-                  href="/admin/login"
+                  href={`/admin/pages?slug=${result.slug}`}
                   className="w-full flex justify-center py-3 px-4 rounded-xl border border-slate-700 text-sm font-medium text-slate-300 hover:bg-slate-800 transition duration-150"
                 >
-                  İşletme Paneline Giriş Yap
+                  İşletme Paneline Git →
                 </a>
               </div>
             </div>

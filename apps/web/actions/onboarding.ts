@@ -43,6 +43,12 @@ export async function registerBusinessAction(input: OnboardingInput) {
     let slug = slugify(businessName);
     if (!slug) slug = `isletme-${Date.now()}`;
 
+    // Check if email already exists
+    const existingUser = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
+    if (existingUser.length > 0) {
+      return { error: 'Bu e-posta adresi zaten başka bir işletmeye kayıtlı.' };
+    }
+
     // Check if slug already exists
     const existingTenant = await db.select().from(tenants).where(eq(tenants.slug, slug)).limit(1);
     if (existingTenant.length > 0) {
@@ -82,12 +88,15 @@ export async function registerBusinessAction(input: OnboardingInput) {
       .returning();
 
     // 5. Create Owner User DB Record
-    await db.insert(users).values({
-      tenantId: newTenant.id,
-      email: email.toLowerCase(),
-      passwordHash,
-      role: 'owner',
-    });
+    const [newUser] = await db
+      .insert(users)
+      .values({
+        tenantId: newTenant.id,
+        email: email.toLowerCase(),
+        passwordHash,
+        role: 'owner',
+      })
+      .returning();
 
     // 6. Create Home Page with AI Generated Blocks
     await db.insert(pages).values({
@@ -98,6 +107,10 @@ export async function registerBusinessAction(input: OnboardingInput) {
       seo,
       published: true,
     });
+
+    // 7. Auto-login session cookie
+    const { createAdminSessionCookie } = await import('@/actions/auth');
+    await createAdminSessionCookie(newUser, newTenant);
 
     revalidatePath(`/${slug}`);
     revalidatePath(`/admin/pages`);

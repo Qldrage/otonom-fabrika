@@ -9,6 +9,28 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'otonom-fabrika-super-secret-key-2026';
 
+export async function createAdminSessionCookie(user: { id: string; role: string; email: string }, tenant: { id: string; slug: string }) {
+  const token = jwt.sign(
+    {
+      userId: user.id,
+      tenantId: tenant.id,
+      slug: tenant.slug,
+      role: user.role,
+      email: user.email,
+    },
+    JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+
+  const cookieStore = await cookies();
+  cookieStore.set('admin_session', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 60 * 60 * 24, // 24 saat
+  });
+}
+
 export async function loginAction(formData: FormData) {
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
@@ -45,25 +67,7 @@ export async function loginAction(formData: FormData) {
     }
 
     // 4. JWT Token İmzala ve Cookie'ye At
-    const token = jwt.sign(
-      {
-        userId: user.id,
-        tenantId: tenant.id,
-        slug: tenant.slug,
-        role: user.role,
-        email: user.email,
-      },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    const cookieStore = await cookies();
-    cookieStore.set('admin_session', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      path: '/',
-      maxAge: 60 * 60 * 24, // 24 saat
-    });
+    await createAdminSessionCookie(user, tenant);
 
     redirect(`/admin/pages?slug=${slug}`);
   } catch (err: any) {

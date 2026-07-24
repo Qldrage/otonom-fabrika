@@ -27,6 +27,14 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
+vi.mock('next/headers', () => ({
+  cookies: async () => ({
+    set: vi.fn(),
+    get: vi.fn(),
+    delete: vi.fn(),
+  }),
+}));
+
 describe('registerBusinessAction Server Action', () => {
   it('registers a business and triggers AI content pipeline successfully', async () => {
     const input = {
@@ -57,5 +65,28 @@ describe('registerBusinessAction Server Action', () => {
 
     const result = await registerBusinessAction(input);
     expect(result.error).toBe('Lütfen tüm zorunlu alanları doldurunuz.');
+  });
+
+  it('returns error when email already exists', async () => {
+    const { db } = await import('@otonom-fabrika/database');
+    vi.spyOn(db, 'select').mockImplementationOnce(() => ({
+      from: () => ({
+        where: () => ({
+          limit: async () => [{ id: 'existing-user-id', email: 'existing@test.com' }],
+        }),
+      }),
+    }) as any);
+
+    const input = {
+      businessName: 'Yeni İşletme',
+      email: 'existing@test.com',
+      password: 'password123',
+      city: 'İstanbul',
+      district: 'Kadıköy',
+      specialty: 'Perde Montajı',
+    };
+
+    const result = await registerBusinessAction(input);
+    expect(result.error).toBe('Bu e-posta adresi zaten başka bir işletmeye kayıtlı.');
   });
 });

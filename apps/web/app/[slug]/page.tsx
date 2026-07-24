@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { BlockRenderer, Block } from '@/components/BlockRenderer';
 import type { Metadata } from 'next';
 
+export const revalidate = 60; // Cache tenant pages for 60 seconds with instant revalidatePath on edit
+
 export async function generateMetadata({
   params,
 }: {
