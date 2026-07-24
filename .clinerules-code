@@ -1,0 +1,14 @@
+# OTONOM FABRİKA — Cline Code Mode Protokolü
+
+## ⚡ GÖREV GELDİĞİNDE YAPMAN GEREKEN İLK 3 ADIM (ASLA ATLAMA)
+
+### ADIM 1 — Anayasayı Yükle
+Her yeni görevde, kod yazmadan ÖNCE şu dosyayı oku:
+`.agents/skills/otonom-fabrika-core-rules/SKILL.md`
+
+### ADIM 2 — Skill Haritasından Doğru Gruba Bak ve İlgili Skill'i Oku
+Haritadan seçtiğin skill klasörünün SKILL.md dosyasını oku:
+`.agents/skills/<skill-klasoru>/SKILL.md`
+
+### ADIM 3 — Sokratik Kapı
+Kullanıcıya 2-3 stratejik soru sor ve onay almadan kod yazma.

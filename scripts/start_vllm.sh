@@ -12,17 +12,17 @@ echo " OTONOM FABRIKA - vLLM Sunuculari Baslatiliyor"
 echo "=============================================="
 
 # ------------------------------------------------------------------
-# SUNUCU 1: Qwen 2.5 Coder 32B (Port 8000) - Ana Kodlama Modeli
+# SUNUCU 1: Qwen 2.5 Coder 14B (Port 8000) - Ana Kodlama Modeli
 # ------------------------------------------------------------------
-echo "[1/2] Qwen 32B Coder baslatiliyor -> PORT 8000..."
+echo "[1/2] Qwen 14B Coder baslatiliyor -> PORT 8000..."
 python -m vllm.entrypoints.openai.api_server \
-  --model ~/models/Qwen-32B-AWQ \
-  --served-model-name "qwen-2.5-coder-32b-awq" \
+  --model Qwen/Qwen2.5-Coder-14B-Instruct-AWQ \
+  --served-model-name "Qwen/Qwen2.5-Coder-14B-Instruct-AWQ" \
   --quantization awq \
   --port 8000 \
   --host 0.0.0.0 \
   --max-model-len 4096 \
-  --gpu-memory-utilization 0.90 \
+  --gpu-memory-utilization 0.55 \
   --enforce-eager \
   --dtype auto &
 
@@ -32,20 +32,20 @@ echo "[1/2] Qwen 32B PID: $QWEN_PID"
 # ------------------------------------------------------------------
 # SUNUCU 2: Qwen VL 7B (Port 8001) - Gorsel Test + Embedding Modeli
 # ------------------------------------------------------------------
-# echo "[2/2] Qwen VL 7B baslatiliyor -> PORT 8001..."
-# python -m vllm.entrypoints.openai.api_server \
-#   --model ~/models/Qwen-VL-7B-AWQ \
-#   --served-model-name "qwen-vl-7b-awq" \
-#   --quantization awq \
-#   --port 8001 \
-#   --host 0.0.0.0 \
-#   --max-model-len 4096 \
-#   --gpu-memory-utilization 0.20 \
-#   --enforce-eager \
-#   --dtype auto &
-#
-# VL_PID=$!
-# echo "[2/2] Qwen VL 7B PID: $VL_PID"
+echo "[2/2] Qwen VL 7B baslatiliyor -> PORT 8001..."
+python -m vllm.entrypoints.openai.api_server \
+  --model Qwen/Qwen2-VL-7B-Instruct-AWQ \
+  --served-model-name "Qwen/Qwen2-VL-7B-Instruct-AWQ" \
+  --quantization awq \
+  --port 8001 \
+  --host 0.0.0.0 \
+  --max-model-len 4096 \
+  --gpu-memory-utilization 0.40 \
+  --enforce-eager \
+  --dtype auto &
+
+VL_PID=$!
+echo "[2/2] Qwen VL 7B PID: $VL_PID"
 
 echo ""
 echo "=============================================="

@@ -3,6 +3,13 @@ node_modules/
 dist/
 build/
 .env
+*.env.*
 *.log
 .DS_Store
 workspace/
+
+# Büyük binary dosyalar
+.bin/
+*.exe
+*.dll
+*.so

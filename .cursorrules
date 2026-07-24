@@ -1,0 +1,56 @@
+# OTONOM FABRİKA — Cline & Cursor Zorunlu Başlangıç Protokolü
+
+## ⚡ GÖREV GELDİĞİNDE YAPMAN GEREKEN İLK 3 ADIM (ASLA ATLAMA)
+
+### ADIM 1 — Anayasayı Yükle
+Her yeni görevde, kod yazmadan ÖNCE şu dosyayı oku:
+`.agents/skills/otonom-fabrika-core-rules/SKILL.md`
+
+Bu dosya senin temel kimliğini, Sokratik Kapı kuralını ve 61 skill'in haritasını içerir.
+
+### ADIM 2 — Skill Haritasından Doğru Gruba Bak
+Anayasadaki "SOKRATİK SKILL HARİTASI" bölümünü incele ve görevine uyan kategoriye bak:
+- 🎨 Frontend/UI/Tasarım → Grup A
+- 🔧 Backend/DevOps → Grup B
+- 🤖 AI/ML → Grup C
+- ⚙️ Mühendislik/Kalite → Grup D
+- 🏢 İş/Platform → Grup E
+- 🧠 Orkestrasyon → Grup F
+
+### ADIM 3 — İlgili Skill'i Oku
+Haritadan seçtiğin skill klasörünün SKILL.md dosyasını oku:
+`.agents/skills/<skill-klasoru>/SKILL.md`
+
+Bunu yapmadan KESİNLİKLE KOD YAZMA.
+
+---
+
+## 🔑 SOKRATİK KAPI ZORUNLULUĞU
+Kullanıcı ne kadar net konuşursa konuşsun, her görevde **en az 2-3 stratejik soru** sor:
+- Hedef kitle kim?
+- Hangi teknoloji stack'i kullanılıyor?
+- Mobil/masaüstü/her ikisi de mi?
+- Performans veya güvenlik önceliği var mı?
+- Mevcut kod tabanıyla entegre mi olacak?
+
+Kullanıcı onay verene kadar hiçbir kod yazma işlemi yapma.
+
+---
+
+## 📁 PROJE VE MONOREPO YAPISI
+KÖK DİZİN: `c:\Users\Dante\Desktop\otonom fabrika`
+DİKKAT: Bu sistem bir Turborepo Monorepo'dur.
+- YENİ PROJELER (Web/SaaS/Mobil) her zaman `c:\Users\Dante\Desktop\otonom fabrika\apps\` klasörünün içine açılacaktır.
+- ORTAK PAKETLER `c:\Users\Dante\Desktop\otonom fabrika\packages\` içindedir.
+- `.agents/skills/` → 61 yetenek (skill) klasörü
+- `.agents/skills/otonom-fabrika-core-rules/SKILL.md` → Ana anayasa
+- `instructions.md` → Global orkestrasyon kuralları
+
+---
+
+## ✅ ZORUNLU KALİTE KONTROL (Her kod tesliminde)
+- [ ] `tdd-workflow` kurallarına göre testler yazıldı mı?
+- [ ] `clean-code` prensiplerine uyuldu mu?
+- [ ] `web-quality-standards` (UI ise) kontrol edildi mi?
+- [ ] `security-auditor` ile bağımlılıklar tarandı mı?
+- [ ] `webwright-automation` ile E2E test yazıldı mı? (kritik akışlarda)

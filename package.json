@@ -1,7 +1,8 @@
 {
   "name": "otonom-fabrika",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
+  "description": "AI agent development framework — copy this repo to start a new project",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -12,28 +13,9 @@
     "lint": "turbo run lint",
     "test": "turbo run test"
   },
-  "dependencies": {
-    "@ai-sdk/openai": "^4.0.16",
-    "@nozbe/watermelondb": "^0.27.1",
-    "ai": "^7.0.31",
-    "dotenv": "^17.4.2",
-    "drizzle-orm": "^0.45.2",
-    "pg": "^8.22.0",
-    "pgvector": "^0.3.0",
-    "react-native-mmkv": "^2.12.2"
-  },
   "devDependencies": {
-    "@playwright/test": "^1.61.1",
-    "@types/pg": "^8.20.0",
-    "drizzle-kit": "^0.31.10",
-    "next": "^16.2.10",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "turbo": "latest"
-  },
-  "overrides": {
-    "@babel/runtime": "^7.26.10",
-    "esbuild": "^0.25.0"
+    "turbo": "latest",
+    "typescript": "^5.x"
   },
   "packageManager": "npm@10.8.1"
 }

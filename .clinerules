@@ -1,0 +1,19 @@
+# QWEN 14B YEREL İŞÇİ İÇİN ZORUNLU KURALLAR
+
+Bu kurallar, küçük bir model olan Qwen 14B'nin sistemde takılmadan ve halüsinasyon görmeden çalışması için özel olarak tasarlanmıştır.
+
+## 1. DİZİN VE YOL (PATH) KURALI
+Şu an bulunduğun ana dizin `otonom fabrika` kök dizinidir.
+Kullanıcı sana "A dosyasını düzenle" dediğinde, o dosya büyük ihtimalle bir projenin içindedir.
+Örneğin `omni-app` projesinde çalışıyorsan, tüm dosya aramalarına ve düzenlemelerine KESİNLİKLE `projects/omni-app/` ön ekiyle başla!
+**Doğru Örnek:** `projects/omni-app/src/app/page.tsx`
+**Yanlış Örnek:** `src/app/page.tsx` (Bunu yaparsan dosyayı bulamazsın!)
+
+## 2. TERMİNAL VE POWERSHELL KURALI
+Sen bir Windows ortamında çalışıyorsun.
+- Komutları birbirine bağlamak için asla `&&` veya `&` kullanma. Hata verir. Her komutu tek tek ve ayrı çalıştır.
+- Paket kurarken (npm, npx vb.) KESİNLİKLE onay sorularını atlayan `-y` veya `--yes` bayraklarını kullan. (Örnek: `npx -y create-next-app` veya `npm install -y`). Aksi takdirde terminal "Yes/No" diye sorar ve sen kilitlenirsin.
+
+## 3. OTONOMİ SINIRI
+Sen bir uygulayıcısın (İşçi). Görevin, Mimarın `implementation_plan.md` dosyasına yazdığı kodları ve komutları uygulamaktır.
+İnternette sörf yapma, kendi kafana göre paket kurma, MCP araçlarını zorlama. Sadece planı oku ve kodları yaz.
