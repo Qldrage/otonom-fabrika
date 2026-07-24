@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { updatePageBlocksAction } from '@/actions/pages';
+import { UploadButton } from '@/lib/uploadthing';
 
 const AVAILABLE_BLOCK_TYPES = [
   {
@@ -192,6 +193,41 @@ export default function PageEditorClient({
                         }}
                         className="w-full font-mono p-2 border rounded text-xs focus:ring-2 focus:ring-indigo-500"
                       />
+                    </div>
+                  ) : typeof val === 'string' && (propKey.toLowerCase().includes('image') || propKey.toLowerCase().includes('url')) ? (
+                    <div className="space-y-2">
+                      {val && (
+                        <div className="relative w-32 h-20 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                          <img src={val} alt="Görsel Önizleme" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={val || ''}
+                          onChange={(e) => handleBlockChange(index, propKey, e.target.value)}
+                          className="flex-1 p-2.5 border border-gray-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                          placeholder="https://..."
+                        />
+                        <UploadButton
+                          endpoint="imageUploader"
+                          onClientUploadComplete={(res) => {
+                            if (res && res[0]) {
+                              handleBlockChange(index, propKey, res[0].url);
+                            }
+                          }}
+                          onUploadError={(error: Error) => {
+                            alert(`Görsel yüklenemedi: ${error.message}`);
+                          }}
+                          content={{
+                            button({ ready }) {
+                              if (ready) return '📁 Fotoğraf Yükle';
+                              return 'Yükleniyor...';
+                            },
+                          }}
+                          className="ut-button:bg-indigo-600 ut-button:hover:bg-indigo-700 ut-button:text-xs ut-button:py-2 ut-button:px-3 ut-button:h-auto ut-button:rounded-lg"
+                        />
+                      </div>
                     </div>
                   ) : typeof val === 'string' && (val.length > 60 || propKey.toLowerCase().includes('sub') || propKey.toLowerCase().includes('address')) ? (
                     <textarea
