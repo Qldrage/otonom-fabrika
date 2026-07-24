@@ -7,6 +7,12 @@ async function seed() {
   console.log('🌱 Seeding database...');
 
   try {
+    const { users, pages, plugins, tenants } = await import('@otonom-fabrika/database');
+    await db.delete(users);
+    await db.delete(pages);
+    await db.delete(plugins);
+    await db.delete(tenants);
+
     // 1. Örnek Perdeci Tenant'ı
     const [tenant] = await db.insert(tenants).values({
       slug: 'elit-perde',
@@ -50,6 +56,30 @@ async function seed() {
     });
     
     console.log(`✅ Sayfa oluşturuldu: /elit-perde`);
+
+    // 4. Admin Kullanıcısını Ekle (bcryptjs ile)
+    const bcrypt = await import('bcryptjs');
+    const passwordHash = await bcrypt.hash('admin123', 10);
+
+    await db.insert(users).values({
+      tenantId: tenant.id,
+      email: 'admin@elit-perde.com',
+      passwordHash,
+      role: 'owner',
+    });
+
+    console.log(`✅ Kullanıcı oluşturuldu: admin@elit-perde.com / admin123`);
+
+    // 5. Test Plugin Secret (API Gateway Auth) Ekle
+    await db.insert(plugins).values({
+      tenantId: tenant.id,
+      name: 'Default Test Plugin',
+      webhookUrl: 'http://localhost:3000/api/v1/webhooks/event',
+      secret: 'sk_test_123456789',
+      events: ['contact.form.submitted'],
+    });
+
+    console.log(`✅ Test Plugin kaydı oluşturuldu: Secret = sk_test_123456789`);
 
   } catch (error) {
     console.error('❌ Seeding failed:', error);

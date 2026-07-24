@@ -12,6 +12,9 @@
   "dependencies": {
     "@otonom-fabrika/database": "^0.0.1",
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.4",
+    "jsonwebtoken": "^9.0.3",
     "next": "16.2.11",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -21,6 +24,8 @@
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
     "@types/bcrypt": "^6.0.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

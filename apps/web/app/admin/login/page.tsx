@@ -24,6 +24,18 @@ export default function LoginPage() {
 
       <form action={formAction} className="space-y-4">
         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">E-posta Adresi</label>
+          <input
+            type="email"
+            name="email"
+            defaultValue="admin@elit-perde.com"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="admin@elit-perde.com"
+          />
+        </div>
+
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">İşletme Slug (URL Kodu)</label>
           <input
             type="text"
