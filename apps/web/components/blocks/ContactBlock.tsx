@@ -1,3 +1,8 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { Phone, Mail, MapPin, Send } from 'lucide-react';
+
 export interface ContactBlockProps {
   title: string;
   address: string;
@@ -7,79 +12,109 @@ export interface ContactBlockProps {
 
 export function ContactBlock({ title, address, phone, email }: ContactBlockProps) {
   return (
-    <section id="contact" className="bg-gray-100 py-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-lg mx-auto md:max-w-none md:grid md:grid-cols-2 md:gap-8">
-          <div>
-            <h2 className="text-2xl font-extrabold text-gray-900 sm:text-3xl">
-              {title}
-            </h2>
-            <div className="mt-3">
-              <p className="text-lg text-gray-500">
-                Bize ulaşın, evinize en uygun perdeleri birlikte seçelim.
+    <section id="contact" className="py-20 bg-slate-900 text-white relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="space-y-8"
+          >
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                {title}
+              </h2>
+              <p className="mt-4 text-slate-300 text-base sm:text-lg leading-relaxed">
+                Bize ulaşın, en uygun fiyat ve ücretsiz keşif hizmetimizle yardımcı olalım.
               </p>
             </div>
-            <div className="mt-9">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
+
+            <div className="space-y-6 pt-4">
+              <div className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-900/50 border border-indigo-700/50 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                  <Phone className="w-5 h-5" />
                 </div>
-                <div className="ml-3 text-base text-gray-500">
-                  <p>{phone}</p>
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Telefon</p>
+                  <p className="text-lg font-bold text-white mt-0.5">{phone}</p>
                 </div>
               </div>
+
               {email && (
-                <div className="mt-6 flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
+                <div className="flex items-center gap-4 group">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-900/50 border border-purple-700/50 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                    <Mail className="w-5 h-5" />
                   </div>
-                  <div className="ml-3 text-base text-gray-500">
-                    <p>{email}</p>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">E-posta</p>
+                    <p className="text-lg font-bold text-white mt-0.5">{email}</p>
                   </div>
                 </div>
               )}
-              <div className="mt-6 flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
+
+              <div className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-900/50 border border-emerald-700/50 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                  <MapPin className="w-5 h-5" />
                 </div>
-                <div className="ml-3 text-base text-gray-500">
-                  <p>{address}</p>
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Adres</p>
+                  <p className="text-base font-medium text-slate-200 mt-0.5">{address}</p>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="mt-12 sm:mt-16 md:mt-0">
-            {/* Otonom Fabrika kuralı: İleride Sokratik form veya CRM Webhook entegre edilecek */}
-            <h2 className="text-2xl font-extrabold text-gray-900 sm:text-3xl">
-              İletişim Formu
-            </h2>
-            <form className="mt-9 grid grid-cols-1 gap-y-6">
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="bg-slate-950/80 backdrop-blur-2xl border border-slate-800 p-8 sm:p-10 rounded-3xl shadow-2xl space-y-6"
+          >
+            <h3 className="text-2xl font-bold text-white">Hızlı İletişim Formu</h3>
+            
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
               <div>
-                <label htmlFor="full-name" className="block text-sm font-medium text-gray-700">İsim Soyisim</label>
-                <div className="mt-1">
-                  <input type="text" name="full-name" id="full-name" autoComplete="name" className="py-3 px-4 block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md" />
-                </div>
+                <label htmlFor="full-name" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Ad Soyad *
+                </label>
+                <input
+                  type="text"
+                  id="full-name"
+                  required
+                  placeholder="Ahmet Yılmaz"
+                  className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                />
               </div>
+
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Telefon</label>
-                <div className="mt-1">
-                  <input type="text" name="phone" id="phone" autoComplete="tel" className="py-3 px-4 block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 border-gray-300 rounded-md" />
-                </div>
+                <label htmlFor="phone-input" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Telefon Numaranız *
+                </label>
+                <input
+                  type="tel"
+                  id="phone-input"
+                  required
+                  placeholder="0555 123 45 67"
+                  className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"
+                />
               </div>
-              <div>
-                <button type="submit" className="w-full inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                  Gönder
-                </button>
-              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                className="w-full py-4 px-6 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 transition duration-200 shadow-xl flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>İletişim Talebi Gönder</span>
+                <Send className="w-4 h-4" />
+              </motion.button>
             </form>
-          </div>
+          </motion.div>
+
         </div>
       </div>
     </section>

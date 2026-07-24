@@ -1,7 +1,19 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import { FeaturesBlock } from './FeaturesBlock';
 import React from 'react';
+
+beforeAll(() => {
+  global.IntersectionObserver = class IntersectionObserver {
+    readonly root: Element | null = null;
+    readonly rootMargin: string = '';
+    readonly thresholds: ReadonlyArray<number> = [];
+    disconnect() {}
+    observe() {}
+    takeRecords() { return []; }
+    unobserve() {}
+  };
+});
 
 describe('FeaturesBlock', () => {
   it('renders features title and feature items', () => {

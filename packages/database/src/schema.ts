@@ -9,6 +9,7 @@ export const roleEnum = pgEnum('role', ['owner', 'editor', 'viewer'])
 export const tenants = pgTable('tenants', {
   id: uuid('id').defaultRandom().primaryKey(),
   slug: text('slug').unique().notNull(),         // domain.com/[slug]
+  customDomain: text('custom_domain').unique(),  // ahmettesisat.com
   name: text('name').notNull(),
   sector: sectorEnum('sector').notNull(),
   plan: planEnum('plan').default('free').notNull(),

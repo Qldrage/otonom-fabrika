@@ -3,6 +3,7 @@ import { eq, and } from 'drizzle-orm';
 import { notFound, redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import PageEditorClient from './PageEditorClient';
+import DomainSettingClient from './DomainSettingClient';
 
 export default async function AdminPagesPage({
   searchParams,
@@ -62,6 +63,10 @@ export default async function AdminPagesPage({
       </div>
 
       <PageEditorClient tenantSlug={tenant.slug} initialBlocks={page.blocks as any[]} />
+
+      <div className="pt-6 border-t border-gray-200">
+        <DomainSettingClient tenantSlug={tenant.slug} initialDomain={tenant.customDomain} />
+      </div>
     </div>
   );
 }

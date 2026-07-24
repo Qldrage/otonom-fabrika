@@ -1,3 +1,8 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { ArrowRight, Sparkles } from 'lucide-react';
+
 export interface HeroBlockProps {
   headline: string;
   subheadline: string;
@@ -7,35 +12,72 @@ export interface HeroBlockProps {
 
 export function HeroBlock({ headline, subheadline, ctaText, imageUrl }: HeroBlockProps) {
   return (
-    <section className="relative bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto">
-        <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-10">
-          <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-            <div className="sm:text-center lg:text-left">
-              <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                <span className="block xl:inline">{headline}</span>
-              </h1>
-              <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                {subheadline}
-              </p>
-              {ctaText && (
-                <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                  <div className="rounded-md shadow">
-                    <a href="#contact" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg">
-                      {ctaText}
-                    </a>
-                  </div>
-                </div>
-              )}
+    <section className="relative overflow-hidden bg-slate-950 text-white py-20 lg:py-32">
+      {/* Dynamic Background Glow Blobs */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 right-10 w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="lg:col-span-7 space-y-6 text-center lg:text-left"
+          >
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-900/40 border border-indigo-700/50 backdrop-blur-md text-indigo-300 text-xs font-semibold uppercase tracking-wider">
+              <Sparkles className="w-4 h-4 text-indigo-400" />
+              <span>Özel Tasarım & Yerel Kalite</span>
             </div>
-          </main>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white">
+              <span className="bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
+                {headline}
+              </span>
+            </h1>
+
+            <p className="text-base sm:text-lg text-slate-300 max-w-2xl leading-relaxed">
+              {subheadline}
+            </p>
+
+            {ctaText && (
+              <motion.div 
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="pt-2 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+              >
+                <a
+                  href="#contact"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-bold text-white bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-xl shadow-indigo-500/25 transition-all duration-200"
+                >
+                  <span>{ctaText}</span>
+                  <ArrowRight className="w-5 h-5" />
+                </a>
+              </motion.div>
+            )}
+          </motion.div>
+
+          {imageUrl && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.9, delay: 0.2 }}
+              className="lg:col-span-5 relative"
+            >
+              <div className="relative rounded-3xl overflow-hidden border border-slate-800 shadow-2xl bg-slate-900/60 backdrop-blur-xl group">
+                <img
+                  src={imageUrl}
+                  alt={headline}
+                  className="w-full h-[380px] sm:h-[450px] object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-60" />
+              </div>
+            </motion.div>
+          )}
+
         </div>
       </div>
-      {imageUrl && (
-        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-          <img className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full" src={imageUrl} alt="Hero Image" />
-        </div>
-      )}
     </section>
   );
 }
