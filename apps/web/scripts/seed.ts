@@ -1,7 +1,9 @@
-import 'dotenv/config';
-import { db, tenants, pages } from '@otonom-fabrika/database';
+import * as dotenv from 'dotenv';
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 async function seed() {
+  const { db, tenants, pages } = await import('@otonom-fabrika/database');
   console.log('🌱 Seeding database...');
 
   try {
